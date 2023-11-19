@@ -1,0 +1,32 @@
+.search-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    background:  rgba(32, 137, 209, 0.6642856971890319);
+    
+}
+body {
+    background-color: beige;
+}
+input,
+button {
+    font-size: 18px;
+    padding: 12px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+input {
+    border-color: rgba(33, 109, 159, 0.664);
+    outline: none;
+    background-color: rgba(168, 204, 227, 0.664);
+}
+button:hover,
+button:hover {
+    background-color: rgba(177, 211, 234, 0.664);
+}
+button {
+    background-color: rgba(33, 109, 159, 0.664);
+    color: rgb(46, 43, 43);
+    border: none;
+}
