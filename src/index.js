@@ -19,7 +19,7 @@ refs.searchForm.addEventListener('submit', handleSubmit);
 console.log(refs.gallery)
 async function handleSubmit(event) {
     event.preventDefault();
-    searchWord = event.currentTarget.searchWord.value;
+    searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value;
     try {
         const searchObjects = await fetchResult(searchWord, page);
         const showObjects = searchObjects.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => ({
