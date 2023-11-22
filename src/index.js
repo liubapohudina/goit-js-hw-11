@@ -26,7 +26,6 @@ async function handleSubmit(event) {
     event.preventDefault();
     searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value.trim();
     page = 1;
- 
     
     try {
         const searchObjects = await fetchResult(searchWord, page);
@@ -56,40 +55,32 @@ async function handleSubmit(event) {
         Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
     }
 }
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', handleScroll)
+    function handleScroll () {
     const {
         scrollTop,
         scrollHeight,
         clientHeight
     } = document.documentElement;
-    console.log( clientHeight)
-
-    if (scrollTop + clientHeight >= scrollHeight - 1) {
-        setTimeout()
+    //console.log(clientHeight)
+        if (scrollTop + clientHeight >= scrollHeight - 1) {
+        refs.loader.classList.remove('loading');
+        refs.loader.classList.add('loaded');
+        //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
         handleScrollToBottom();
+       
     }
-});
-
-async function setTimeout() {
-             setTimeout(function () {
-    refs.loader.classList.remove('loading');
-    refs.loader.classList.add('loaded');
-  }, 5000);
-}
+  scrollFunction()
+};
 
 
 async function handleScrollToBottom() {
     page += 1;
-    await setTimeout()
-    //refs.loader.classList.add('loaded');
+   
 
 
     try {
         const searchObjects = await fetchResult(searchWord, page);
-//          setTimeout(function () {
-//     refs.loader.classList.remove('loading');
-//     refs.loader.classList.add('loaded');
-//   }, 5000);
         const selectHits = searchObjects.hits.length;
         currentHits += selectHits;
 
@@ -113,16 +104,16 @@ async function handleScrollToBottom() {
     }
 }
 
-
+//--------------------FUNCTION VARIANT 2 WITH USE BUTTON LOAD MORE-------------------------------//
     
-// refs.loader.addEventListener('click', handleClick);
+// refs.loadMoreBtn.addEventListener('click', handleClick);
 
 
    
     
 // async function handleClick() {
 //     page += 1;
-//     refs.loader.classList.add('loader')
+//     refs.loadMoreBtn.classList.add('load-more')
 //     const searchObjects = await fetchResult(searchWord, page);
 //     const selectHits = searchObjects.hits.length
 //     currentHits += selectHits
@@ -137,9 +128,9 @@ async function handleScrollToBottom() {
 //     pageScroll()
 //     if (searchObjects.totalHits === currentHits) {
 //         Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-//         refs.loader.disabled = true;
-//         refs.loader.classList.remove('loader')
-//         refs.loader.classList.add('is-hidden')
+//         refs.loadMoreBtn.disabled = true;
+//         refs.loadMoreBtn.classList.remove('load-more')
+//         refs.loadMoreBtn.classList.add('is-hidden')
 //         refs.infoForUser.classList.remove('is-hidden')
         
 //     }
@@ -174,12 +165,44 @@ function Markup(hits) {
 }
  function pageScroll() {
        const { height: cardHeight } = document
-   .querySelector(".gallery")
-   .firstElementChild.getBoundingClientRect();
-
-    window.scrollBy({
-     top: cardHeight * 2,
-     behavior: "smooth",
-    });
+         .querySelector(".gallery")
+//      //------------------------VARIANT WITHOUT ANIME----------------------------//
+// //    .firstElementChild.getBoundingClientRect();
+// //     window.scrollBy({
+// //      top: cardHeight * 2,
+// //      behavior: "smooth",
+//      //      });
+         anime({
+                 targets: [document.documentElement, document.body],
+                scrollBottom: cardHeight * 2,
+                duration: 3000,
+                easing: 'easeInOutQuad'
+           });
    
+ }
+
+
+//---------------------------REALISE BUTTON FOR SCROLL-------------------//
+
+
+function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      //console.log(document.documentElement.scrollTop)
+      document.getElementById("scrollToTop").style.display = "block";
+      document.getElementById("scrollToTop").addEventListener("click", topFunction)
+  } else {
+    document.getElementById("scrollToTop").style.display = "none";
+  }
+}
+function topFunction() {
+    //----------------------VARIANT WITHOUT ANIME------------------------//
+//   document.body.scrollTop = 0;
+    //     document.documentElement.scrollTop = 0;
+    
+   anime({
+                 targets: [document.documentElement, document.body],
+                scrollTop: 0,
+                duration: 1000,
+                easing: 'easeInOutQuad'
+            });
 }
