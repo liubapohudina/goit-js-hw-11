@@ -6,9 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search</title>
     <link rel="stylesheet" href="./common.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&family=Nunito:wght@400;600;800&display=swap"
+        rel="stylesheet">
 </head>
 
-<body>
+<body id="vanta-background">
     <form class="search-form" id="search-form">
         <input type="text" name="searchQuery" autocomplete="off" placeholder="Search images..." />
         <button type="submit">Search</button>
@@ -16,7 +20,15 @@
     <div class="gallery">
         <!-- Картки зображень -->
     </div>
+    <span class="loader is-hidden"></span>
+    <button type="button" class="load-more is-hidden">Load more</button>
+    <p class="info-for-user is-hidden">We're sorry, but you've reached the end of search results.</p>
     <script src="index.js" type="module"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.clouds.min.js"></script>
+<script>
+    VANTA.CLOUDS('#vanta-background')
+</script>
 </body>
 
 </html

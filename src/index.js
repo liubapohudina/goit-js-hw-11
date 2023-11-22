@@ -1,35 +1,185 @@
 import Notiflix from 'notiflix';
-import axios from "axios";
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 import { fetchResult } from './fetchResult';
 
-axios.defaults.headers.common["x-api-key"] = "40771201-2278ca32ba7eea467c30dfc24"
+
 
 const refs = {
     searchForm: document.querySelector('#search-form'),
-    gallery: document.querySelector('.gallery')
+    gallery: document.querySelector('.gallery'),
+    loadMoreBtn: document.querySelector('.load-more'),
+    infoForUser: document.querySelector('.info-for-user'),
+    loader: document.querySelector('.loader'),
 }
-console.log(refs.searchForm)
-let a = 5
-console.log(a)
 
 
+
+
+//refs.loadMoreBtn.style.display = "none"
+let currentHits = 0;
 let page = 1;
 let searchWord = ''
 refs.searchForm.addEventListener('submit', handleSubmit);
-console.log(refs.gallery)
+
 async function handleSubmit(event) {
     event.preventDefault();
-    searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value;
+    searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value.trim();
+    page = 1;
+ 
+    
     try {
         const searchObjects = await fetchResult(searchWord, page);
-        const showObjects = searchObjects.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => ({
-            webformatURL, largeImageURL, alt: tags, likes, views, comments, downloads
-        }));
-        if (showObjects.length === 0) {
-            return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+        const selectHits = searchObjects.hits.length
+        currentHits = selectHits
+        //console.log(selectHits)
+        if (searchObjects.totalHits === 0) {
+            refs.gallery.innerHTML = ''
+            refs.loader.classList.add('is-hidden')
+            return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
         }
-    
+        if (searchWord === '') {
+            return;
+        }
+
+        if (searchObjects.totalHits > 40) {
+            Notiflix.Notify.info(`Hooray! We found ${searchObjects.totalHits} images.`)
+            let hits = searchObjects.hits;
+            refs.gallery.innerHTML = Markup(hits);
+            let simpleLightBox = new SimpleLightbox('.gallery a', {
+                captions: false,
+            })
+            refs.loader.classList.remove('is-hidden');
+            refs.loader.classList.add('loader');
+        }
     } catch (error) {
-        Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+        Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
     }
+}
+window.addEventListener('scroll', function() {
+    const {
+        scrollTop,
+        scrollHeight,
+        clientHeight
+    } = document.documentElement;
+    console.log( clientHeight)
+
+    if (scrollTop + clientHeight >= scrollHeight - 1) {
+        setTimeout()
+        handleScrollToBottom();
+    }
+});
+
+async function setTimeout() {
+             setTimeout(function () {
+    refs.loader.classList.remove('loading');
+    refs.loader.classList.add('loaded');
+  }, 5000);
+}
+
+
+async function handleScrollToBottom() {
+    page += 1;
+    await setTimeout()
+    //refs.loader.classList.add('loaded');
+
+
+    try {
+        const searchObjects = await fetchResult(searchWord, page);
+//          setTimeout(function () {
+//     refs.loader.classList.remove('loading');
+//     refs.loader.classList.add('loaded');
+//   }, 5000);
+        const selectHits = searchObjects.hits.length;
+        currentHits += selectHits;
+
+        let hits = searchObjects.hits;
+        refs.gallery.innerHTML += Markup(hits);
+        let simpleLightBox = new SimpleLightbox('.gallery a', {
+            captions: false,
+        });
+        simpleLightBox.refresh();
+        pageScroll();
+
+        if (searchObjects.totalHits === currentHits) {
+           // Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+            refs.loader.disabled = true;
+            refs.loader.classList.remove('loader');
+            refs.loader.classList.add('is-hidden');
+            refs.infoForUser.classList.remove('is-hidden');
+        }
+    } catch (error) {
+        Notiflix.Notify.failure("Sorry, there was an error loading more images. Please try again.");
+    }
+}
+
+
+    
+// refs.loader.addEventListener('click', handleClick);
+
+
+   
+    
+// async function handleClick() {
+//     page += 1;
+//     refs.loader.classList.add('loader')
+//     const searchObjects = await fetchResult(searchWord, page);
+//     const selectHits = searchObjects.hits.length
+//     currentHits += selectHits
+    
+//     //console.log(currentHits)
+//      let hits = searchObjects.hits;
+//     refs.gallery.innerHTML += Markup(hits);
+//     let simpleLightBox = new SimpleLightbox('.gallery a', {
+//            captions: false,
+//     })
+//     simpleLightBox.refresh()
+//     pageScroll()
+//     if (searchObjects.totalHits === currentHits) {
+//         Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+//         refs.loader.disabled = true;
+//         refs.loader.classList.remove('loader')
+//         refs.loader.classList.add('is-hidden')
+//         refs.infoForUser.classList.remove('is-hidden')
+        
+//     }
+// }
+
+function Markup(hits) {
+   
+    return hits
+        .map((image) => {
+            return `<div class="photo-card">
+                <a href="${image.largeImageURL}">
+                    <img class="photo" src="${image.webformatURL}" alt="${image.tags}" title="${image.tags}" loading="lazy"/>
+                </a>
+                <div class="info">
+                    <p class="info-item">
+                        <b>Likes</b> <span class="info-item-api"> ${image.likes} </span>
+                    </p>
+                    <p class="info-item">
+                        <b>Views</b> <span class="info-item-api">${image.views}</span>
+                    </p>
+                    <p class="info-item">
+                        <b>Comments</b> <span class="info-item-api">${image.comments}</span>
+                    </p>
+                    <p class="info-item">
+                        <b>Downloads</b> <span class="info-item-api">${image.downloads}</span>
+                    </p>
+                </div>
+            </div>`;
+        })
+        .join('');
+
+}
+ function pageScroll() {
+       const { height: cardHeight } = document
+   .querySelector(".gallery")
+   .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+     top: cardHeight * 2,
+     behavior: "smooth",
+    });
+   
 }

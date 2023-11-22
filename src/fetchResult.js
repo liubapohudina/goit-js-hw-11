@@ -6,6 +6,8 @@ export async function fetchResult(searchWord, page) {
     const params = new URLSearchParams ({
         key: API_KEY,
         q: searchWord,
+        per_page: 40,
+        page: page,
         image_type: 'photo',
         orientation: 'horizontal',
         safesearch: true
