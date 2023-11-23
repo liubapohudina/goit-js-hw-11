@@ -25,7 +25,12 @@ refs.searchForm.addEventListener('submit', handleSubmit);
 async function handleSubmit(event) {
     event.preventDefault();
     searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value.trim();
+    //searchWord = event.currenttarget.searchWord.value
+    console.log(searchWord)
     page = 1;
+    if (searchWord === "") {
+            return;
+        }
     
     try {
         const searchObjects = await fetchResult(searchWord, page);
@@ -37,11 +42,8 @@ async function handleSubmit(event) {
             refs.loader.classList.add('is-hidden')
             return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
         }
-        if (searchWord === '') {
-            return;
-        }
 
-        if (searchObjects.totalHits > 40) {
+        if (searchObjects.totalHits > 0) {
             Notiflix.Notify.info(`Hooray! We found ${searchObjects.totalHits} images.`)
             let hits = searchObjects.hits;
             refs.gallery.innerHTML = Markup(hits);
@@ -76,7 +78,7 @@ window.addEventListener('scroll', handleScroll)
 
 async function handleScrollToBottom() {
     page += 1;
-   
+    pageScroll();
 
 
     try {
@@ -89,8 +91,9 @@ async function handleScrollToBottom() {
         let simpleLightBox = new SimpleLightbox('.gallery a', {
             captions: false,
         });
+        
         simpleLightBox.refresh();
-        pageScroll();
+        
 
         if (searchObjects.totalHits === currentHits) {
            // Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
@@ -137,7 +140,6 @@ async function handleScrollToBottom() {
 // }
 
 function Markup(hits) {
-   
     return hits
         .map((image) => {
             return `<div class="photo-card">
@@ -161,6 +163,7 @@ function Markup(hits) {
             </div>`;
         })
         .join('');
+    
 
 }
  function pageScroll() {
