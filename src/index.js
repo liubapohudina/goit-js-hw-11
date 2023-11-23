@@ -11,8 +11,8 @@ const refs = {
     loadMoreBtn: document.querySelector('.load-more'),
     infoForUser: document.querySelector('.info-for-user'),
     loader: document.querySelector('.loader'),
+    btn: document.getElementsByName('btn-submit')
 }
-
 
 
 
@@ -26,15 +26,19 @@ async function handleSubmit(event) {
     event.preventDefault();
     searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value.trim();
     //searchWord = event.currenttarget.searchWord.value
-    console.log(searchWord)
+   
     page = 1;
     if (searchWord === "") {
-            return;
+        refs.loader.classList.add('is-hidden')
+        refs.infoForUser.classList.add('is-hidden')
+        refs.gallery.innerHTML = '';
+        return Notiflix.Notify.info("Please, enter at least one letter!")
         }
     
     try {
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length
+        console.log(searchObjects.totalHits)
         currentHits = selectHits
         //console.log(selectHits)
         if (searchObjects.totalHits === 0) {
@@ -44,20 +48,36 @@ async function handleSubmit(event) {
         }
 
         if (searchObjects.totalHits > 0) {
+
             Notiflix.Notify.info(`Hooray! We found ${searchObjects.totalHits} images.`)
             let hits = searchObjects.hits;
             refs.gallery.innerHTML = Markup(hits);
             let simpleLightBox = new SimpleLightbox('.gallery a', {
                 captions: false,
             })
+            simpleLightBox.refresh();
+            refs.btn[0].disabled = true;
+            refs.btn[0].classList.add('btn-submit')
             refs.loader.classList.remove('is-hidden');
             refs.loader.classList.add('loader');
+            refs.searchForm.addEventListener('input', inputChange)
+        }
+        if (searchObjects.totalHits <= 40) {
+            refs.loader.classList.add('is-hidden')
+            refs.infoForUser.classList.remove('is-hidden')
+        }
+        if (searchObjects.totalHits > 40) {
+            window.addEventListener('scroll', handleScroll)
         }
     } catch (error) {
         Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
     }
 }
-window.addEventListener('scroll', handleScroll)
+function inputChange() {
+    refs.btn[0].disabled = false;
+    refs.btn[0].classList.remove('btn-submit')
+}
+
     function handleScroll () {
     const {
         scrollTop,
@@ -65,35 +85,38 @@ window.addEventListener('scroll', handleScroll)
         clientHeight
     } = document.documentElement;
     //console.log(clientHeight)
-        if (scrollTop + clientHeight >= scrollHeight - 1) {
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
         refs.loader.classList.remove('loading');
         refs.loader.classList.add('loaded');
         //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
         handleScrollToBottom();
-       
-    }
+        }
   scrollFunction()
 };
 
 
 async function handleScrollToBottom() {
-    page += 1;
-    pageScroll();
+  
 
 
     try {
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length;
-        currentHits += selectHits;
+        if (searchObjects.totalHits > 40) {
+            currentHits += selectHits;
+            page += 1;
+            pageScroll();
+        }
+        if (searchObjects.totalHits <= 40) {
+            page = 1
+        }
+        // let hits = searchObjects.hits;
+        // refs.gallery.innerHTML += Markup(hits);
+        // let simpleLightBox = new SimpleLightbox('.gallery a', {
+        //     captions: false,
+        // });
+        
 
-        let hits = searchObjects.hits;
-        refs.gallery.innerHTML += Markup(hits);
-        let simpleLightBox = new SimpleLightbox('.gallery a', {
-            captions: false,
-        });
-        
-        simpleLightBox.refresh();
-        
 
         if (searchObjects.totalHits === currentHits) {
            // Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");

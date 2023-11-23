@@ -49,6 +49,10 @@ button {
     border: none;
     transition: background-color 400ms linear;
 }
+.btn-submit {
+    background-color: rgba(168, 204, 227, 0.664);
+    cursor: none;
+}
 .load-more {
     display: block;
     margin: 20px auto;
