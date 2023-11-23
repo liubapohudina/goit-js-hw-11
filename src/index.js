@@ -38,10 +38,9 @@ async function handleSubmit(event) {
     try {
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length
-        console.log(searchObjects.totalHits)
         currentHits = selectHits
         //console.log(selectHits)
-        if (searchObjects.totalHits === 0) {
+        if (selectHits === 0) {
             refs.gallery.innerHTML = ''
             refs.loader.classList.add('is-hidden')
             return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
@@ -55,19 +54,11 @@ async function handleSubmit(event) {
             let simpleLightBox = new SimpleLightbox('.gallery a', {
                 captions: false,
             })
-            simpleLightBox.refresh();
             refs.btn[0].disabled = true;
             refs.btn[0].classList.add('btn-submit')
             refs.loader.classList.remove('is-hidden');
             refs.loader.classList.add('loader');
             refs.searchForm.addEventListener('input', inputChange)
-        }
-        if (searchObjects.totalHits <= 40) {
-            refs.loader.classList.add('is-hidden')
-            refs.infoForUser.classList.remove('is-hidden')
-        }
-        if (searchObjects.totalHits > 40) {
-            window.addEventListener('scroll', handleScroll)
         }
     } catch (error) {
         Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
@@ -77,7 +68,7 @@ function inputChange() {
     refs.btn[0].disabled = false;
     refs.btn[0].classList.remove('btn-submit')
 }
-
+window.addEventListener('scroll', handleScroll)
     function handleScroll () {
     const {
         scrollTop,
@@ -85,38 +76,35 @@ function inputChange() {
         clientHeight
     } = document.documentElement;
     //console.log(clientHeight)
-        if (scrollTop + clientHeight >= scrollHeight - 200) {
+        if (scrollTop + clientHeight >= scrollHeight - 1) {
         refs.loader.classList.remove('loading');
         refs.loader.classList.add('loaded');
         //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
         handleScrollToBottom();
-        }
+       
+    }
   scrollFunction()
 };
 
 
 async function handleScrollToBottom() {
-  
+    page += 1;
+    pageScroll();
 
 
     try {
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length;
-        if (searchObjects.totalHits > 40) {
-            currentHits += selectHits;
-            page += 1;
-            pageScroll();
-        }
-        if (searchObjects.totalHits <= 40) {
-            page = 1
-        }
-        // let hits = searchObjects.hits;
-        // refs.gallery.innerHTML += Markup(hits);
-        // let simpleLightBox = new SimpleLightbox('.gallery a', {
-        //     captions: false,
-        // });
-        
+        currentHits += selectHits;
 
+        let hits = searchObjects.hits;
+        refs.gallery.innerHTML += Markup(hits);
+        let simpleLightBox = new SimpleLightbox('.gallery a', {
+            captions: false,
+        });
+        
+        simpleLightBox.refresh();
+        
 
         if (searchObjects.totalHits === currentHits) {
            // Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
