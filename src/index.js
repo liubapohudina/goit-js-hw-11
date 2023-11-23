@@ -40,7 +40,7 @@ async function handleSubmit(event) {
         const selectHits = searchObjects.hits.length
         currentHits = selectHits
         //console.log(selectHits)
-        if (selectHits === 0) {
+        if (searchObjects.totalHits === 0) {
             refs.gallery.innerHTML = ''
             refs.loader.classList.add('is-hidden')
             return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
@@ -60,6 +60,7 @@ async function handleSubmit(event) {
             refs.loader.classList.add('loader');
             refs.searchForm.addEventListener('input', inputChange)
         }
+        
     } catch (error) {
         Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
     }
@@ -76,7 +77,7 @@ window.addEventListener('scroll', handleScroll)
         clientHeight
     } = document.documentElement;
     //console.log(clientHeight)
-        if (scrollTop + clientHeight >= scrollHeight - 1) {
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
         refs.loader.classList.remove('loading');
         refs.loader.classList.add('loaded');
         //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
@@ -86,7 +87,7 @@ window.addEventListener('scroll', handleScroll)
   scrollFunction()
 };
 
-
+   
 async function handleScrollToBottom() {
     page += 1;
     pageScroll();
@@ -96,7 +97,7 @@ async function handleScrollToBottom() {
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length;
         currentHits += selectHits;
-
+       console.log(searchObjects.totalHits)
         let hits = searchObjects.hits;
         refs.gallery.innerHTML += Markup(hits);
         let simpleLightBox = new SimpleLightbox('.gallery a', {
