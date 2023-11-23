@@ -77,7 +77,7 @@ window.addEventListener('scroll', handleScroll)
         clientHeight
     } = document.documentElement;
     //console.log(clientHeight)
-        if (scrollTop + clientHeight >= scrollHeight - 200) {
+        if (scrollTop + clientHeight >= scrollHeight - 2) {
         refs.loader.classList.remove('loading');
         refs.loader.classList.add('loaded');
         //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
