@@ -1,3 +1,4 @@
+/!------------------------------SCROLL IS RELISED WITH WIMDOW.ADDLISTENER("scroll")-----------------------------!/
 import Notiflix from 'notiflix';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
@@ -11,7 +12,6 @@ const refs = {
     loadMoreBtn: document.querySelector('.load-more'),
     infoForUser: document.querySelector('.info-for-user'),
     loader: document.querySelector('.loader'),
-    observerElement: document.querySelector('.observer-element'),
     btn: document.getElementsByName('btn-submit')
 }
 
@@ -21,146 +21,129 @@ const refs = {
 let currentHits = 0;
 let page = 1;
 let searchWord = ''
-
-
 refs.searchForm.addEventListener('submit', handleSubmit);
+
+let shouldHandleScroll = true;
 
 
 async function handleSubmit(event) {
     event.preventDefault();
     searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value.trim();
-    observer.observe(refs.observerElement);
-    console.log(refs.observerElement);
+    //searchWord = event.currenttarget.searchWord.value
     currentHits = 0;
     page = 1;
-
     if (searchWord === "") {
-        refs.loader.classList.add('is-hidden');
-        refs.infoForUser.classList.add('is-hidden');
+        refs.loader.classList.add('is-hidden')
+        refs.infoForUser.classList.add('is-hidden')
         refs.gallery.innerHTML = '';
-        return Notiflix.Notify.info("Please, enter at least one letter!");
-    }
-
+        return Notiflix.Notify.info("Please, enter at least one letter!")
+        }
+    
     try {
         const searchObjects = await fetchResult(searchWord, page);
-        const selectHits = searchObjects.hits.length;
-        currentHits += selectHits;
-        console.log(currentHits, searchObjects.totalHits);
-
+        const selectHits = searchObjects.hits.length
+        currentHits += selectHits
+        console.log(currentHits, searchObjects.totalHits)
         if (searchObjects.hits.length === 0) {
-             refs.loader.classList.add('is-hidden');
-             refs.infoForUser.classList.add('is-hidden');
-            refs.gallery.innerHTML = '';
-            return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again or try another word.");
+            // refs.gallery.innerHTML = ''
+            // refs.loader.classList.add('is-hidden')
+            return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
         }
 
-        Notiflix.Notify.info(`Hooray! We found ${searchObjects.totalHits} images.`);
-        let hits = searchObjects.hits;
-        refs.gallery.innerHTML = Markup(hits);
-        let simpleLightBox = new SimpleLightbox('.gallery a', {
-            captions: false,
-        });
-        refs.btn[0].disabled = true;
-        refs.btn[0].classList.add('btn-submit');
-        refs.loader.classList.remove('is-hidden');
-        refs.loader.classList.add('loader');
-        refs.searchForm.addEventListener('input', inputChange);
-
-        if (currentHits < searchObjects.totalHits) {
-            observer.observe(refs.observerElement);
+        if (searchObjects.totalHits > 0) {
+             
+            Notiflix.Notify.info(`Hooray! We found ${searchObjects.totalHits} images.`)
+            let hits = searchObjects.hits;
+            refs.gallery.innerHTML = Markup(hits);
+            let simpleLightBox = new SimpleLightbox('.gallery a', {
+                captions: false,
+            })
+            refs.btn[0].disabled = true;
+            refs.btn[0].classList.add('btn-submit')
+            refs.loader.classList.remove('is-hidden');
+            refs.loader.classList.add('loader');
+            refs.searchForm.addEventListener('input', inputChange)
         }
-
+        if (searchObjects.totalHits > 40) {
+             window.addEventListener('scroll', handleScroll)
+        }
         if (currentHits === searchObjects.totalHits) {
-            scrollFunction();
-            observer.unobserve(refs.observerElement);
-            refs.loader.classList.add('is-hidden');
-            refs.infoForUser.classList.remove('is-hidden');
+            shouldHandleScroll = false;
+            //window.removeEventListener('scroll', handleScroll)
+            scrollFunction()
+            refs.loader.classList.add('is-hidden')
+            refs.infoForUser.classList.remove('is-hidden')
         }
-
+       
+        
     } catch (error) {
-        console.error(error);  
-        Notiflix.Notify.failure("Sorry, there was an error. Please try again.");
+        Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
     }
 }
-
-
 function inputChange() {
     refs.btn[0].disabled = false;
     refs.btn[0].classList.remove('btn-submit')
 }
 
-// async function handleScroll(entries) {
-//   entries.forEach(async entry => {
-//     if (entry.isIntersecting) {
-//     //   const {
-//     //     scrollTop,
-//     //     scrollHeight,
-//     //     clientHeight
-//     //   } = document.documentElement;
-      
-//       //if (scrollTop + clientHeight >= scrollHeight - 2) {
-//         refs.loader.classList.remove('loading');
-//         refs.loader.classList.add('loaded');
-//         refs.infoForUser.classList.add('is-hidden');
-        
-//         handleScrollToBottom();
-//       //}
-
-//       scrollFunction();
-//     }
-//   });
-// }
-
+async function handleScroll() {
+        if (!shouldHandleScroll) {
+        return;
+    }
+    const {
+        scrollTop,
+        scrollHeight,
+        clientHeight
+    } = document.documentElement;
+        //console.log(clientHeight)
+        if (scrollTop + clientHeight >= scrollHeight - 2) {
+        refs.loader.classList.remove('loading');
+            refs.loader.classList.add('loaded');
+            refs.infoForUser.classList.add('is-hidden')
+        //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
+        handleScrollToBottom();
+       
+    }
+ scrollFunction()
+};
 
 
+   
+async function handleScrollToBottom() {
+      if (!shouldHandleScroll) {
+        return;
+    }
+    page += 1;
+    pageScroll();
 
 
-
-const observer = new IntersectionObserver(handleScrollToBottom, {
-  rootMargin: '100px',
-});
-
-async function handleScrollToBottom(entries) {
-  for (const entry of entries) {
     try {
-      if (entry.isIntersecting && searchWord !== "") {
-        page += 1;
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length;
         currentHits += selectHits;
-        console.log(searchObjects.totalHits);
-        console.log(entry.isIntersecting);
-        refs.infoForUser.classList.add('is-hidden');
+       console.log(searchObjects.totalHits)
         let hits = searchObjects.hits;
         refs.gallery.innerHTML += Markup(hits);
         let simpleLightBox = new SimpleLightbox('.gallery a', {
-          captions: false,
+            captions: false,
         });
-
+        
         simpleLightBox.refresh();
-        pageScroll();
-
-        if (searchObjects.totalHits === currentHits) {
-          console.log(entry.isIntersecting);
-          refs.loader.disabled = true;
-          refs.loader.classList.remove('loader');
-          refs.loader.classList.add('is-hidden');
-          refs.infoForUser.classList.remove('is-hidden');
-          observer.unobserve(refs.observerElement);
+          if (currentHits === searchObjects.totalHits) {
+            shouldHandleScroll = false; 
+            refs.loader.classList.add('is-hidden');
+            refs.infoForUser.classList.remove('is-hidden');
         }
-      }
+        if (searchObjects.totalHits === currentHits) {
+           // Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+            refs.loader.disabled = true;
+            refs.loader.classList.remove('loader');
+            refs.loader.classList.add('is-hidden');
+            refs.infoForUser.classList.remove('is-hidden');
+        }
     } catch (error) {
-      Notiflix.Notify.failure("444 Sorry, there was an error loading more images. Please try again.");
+        Notiflix.Notify.failure("Sorry, there was an error loading more images. Please try again.");
     }
-    }
-    scrollFunction()
 }
-
-
-observer.observe(refs.observerElement);
-
-
-
 
 //--------------------FUNCTION VARIANT 2 WITH USE BUTTON LOAD MORE-------------------------------//
     
