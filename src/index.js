@@ -1,3 +1,7 @@
+//-----------------------SCROLL implemented with the help of a pattern observer-------------------------//
+
+
+
 import Notiflix from 'notiflix';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";

@@ -1,4 +1,4 @@
-/!------------------------------SCROLL IS RELISED WITH WIMDOW.ADDLISTENER("scroll")-----------------------------!/
+/!------------------------------SCROLL implemented with the help of a pattern WIMDOW.ADDLISTENER("scroll")-----------------------------!/
 import Notiflix from 'notiflix';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
