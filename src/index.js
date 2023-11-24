@@ -52,6 +52,7 @@ async function handleSubmit(event) {
         console.log(currentHits, searchObjects.totalHits);
 
         if (searchObjects.hits.length === 0) {
+             observer.unobserve(refs.observerElement);
              refs.loader.classList.add('is-hidden');
              refs.infoForUser.classList.add('is-hidden');
             refs.gallery.innerHTML = '';
