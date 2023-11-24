@@ -22,11 +22,14 @@ let page = 1;
 let searchWord = ''
 refs.searchForm.addEventListener('submit', handleSubmit);
 
+let shouldHandleScroll = true;
+
+
 async function handleSubmit(event) {
     event.preventDefault();
     searchWord = event.currentTarget.querySelector('[name="searchQuery"]').value.trim();
     //searchWord = event.currenttarget.searchWord.value
-   
+    currentHits = 0;
     page = 1;
     if (searchWord === "") {
         refs.loader.classList.add('is-hidden')
@@ -38,16 +41,16 @@ async function handleSubmit(event) {
     try {
         const searchObjects = await fetchResult(searchWord, page);
         const selectHits = searchObjects.hits.length
-        currentHits = selectHits
-        //console.log(selectHits)
-        if (searchObjects.totalHits === 0) {
-            refs.gallery.innerHTML = ''
-            refs.loader.classList.add('is-hidden')
+        currentHits += selectHits
+        console.log(currentHits, searchObjects.totalHits)
+        if (searchObjects.hits.length === 0) {
+            // refs.gallery.innerHTML = ''
+            // refs.loader.classList.add('is-hidden')
             return Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
         }
 
         if (searchObjects.totalHits > 0) {
-
+             
             Notiflix.Notify.info(`Hooray! We found ${searchObjects.totalHits} images.`)
             let hits = searchObjects.hits;
             refs.gallery.innerHTML = Markup(hits);
@@ -60,6 +63,17 @@ async function handleSubmit(event) {
             refs.loader.classList.add('loader');
             refs.searchForm.addEventListener('input', inputChange)
         }
+        if (searchObjects.totalHits > 40) {
+             window.addEventListener('scroll', handleScroll)
+        }
+        if (currentHits === searchObjects.totalHits) {
+            shouldHandleScroll = false;
+            //window.removeEventListener('scroll', handleScroll)
+            scrollFunction()
+            refs.loader.classList.add('is-hidden')
+            refs.infoForUser.classList.remove('is-hidden')
+        }
+       
         
     } catch (error) {
         Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
@@ -69,26 +83,34 @@ function inputChange() {
     refs.btn[0].disabled = false;
     refs.btn[0].classList.remove('btn-submit')
 }
-window.addEventListener('scroll', handleScroll)
-    function handleScroll () {
+
+async function handleScroll() {
+        if (!shouldHandleScroll) {
+        return;
+    }
     const {
         scrollTop,
         scrollHeight,
         clientHeight
     } = document.documentElement;
-    //console.log(clientHeight)
+        //console.log(clientHeight)
         if (scrollTop + clientHeight >= scrollHeight - 2) {
         refs.loader.classList.remove('loading');
-        refs.loader.classList.add('loaded');
+            refs.loader.classList.add('loaded');
+            refs.infoForUser.classList.add('is-hidden')
         //console.log(`scrollTop: ${scrollTop},  clientHeight: ${clientHeight}, scrollHeight: ${scrollHeight}`)
         handleScrollToBottom();
        
     }
-  scrollFunction()
+ scrollFunction()
 };
+
 
    
 async function handleScrollToBottom() {
+      if (!shouldHandleScroll) {
+        return;
+    }
     page += 1;
     pageScroll();
 
@@ -105,8 +127,11 @@ async function handleScrollToBottom() {
         });
         
         simpleLightBox.refresh();
-        
-
+          if (currentHits === searchObjects.totalHits) {
+            shouldHandleScroll = false; 
+            refs.loader.classList.add('is-hidden');
+            refs.infoForUser.classList.remove('is-hidden');
+        }
         if (searchObjects.totalHits === currentHits) {
            // Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
             refs.loader.disabled = true;
