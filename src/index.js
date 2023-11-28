@@ -226,23 +226,23 @@ function Markup(hits) {
     
 
 }
-//  function pageScroll() {
-//        const { height: cardHeight } = document
-//          .querySelector(".gallery")
+ function pageScroll() {
+       const { height: cardHeight } = document
+         .querySelector(".gallery")
 // //      //------------------------VARIANT WITH ANIME----------------------------//
 // // //    .firstElementChild.getBoundingClientRect();
 // // //     window.scrollBy({
 // // //      top: cardHeight * 2,
 // // //      behavior: "smooth",
 // //      //      });
-//          anime({
-//                  targets: [document.documentElement, document.body],
-//                 scrollBottom: cardHeight * 2,
-//                 duration: 3000,
-//                 easing: 'easeInOutQuad'
-//            });
+         anime({
+                 targets: [document.documentElement, document.body],
+                scrollBottom: cardHeight * 2,
+                duration: 3000,
+                easing: 'easeInOutQuad'
+           });
    
-//  }
+ }
 
 
 //---------------------------REALISE BUTTON FOR SCROLL-------------------//
